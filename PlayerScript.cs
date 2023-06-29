@@ -1,16 +1,38 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerScript : MonoBehaviour
 {
+
+    //HealthBar
+    int currentHealth = 20;
+    int maxHealth = 20;
+    public HPBar hpBar;
+
+    //Count of collectibles
+    int count = 0;
+
+    //HP Bar measures
+    private void OnCollisionEnter(Collision collision)
+    {
+        //Points added if player collects
+        if (collision.gameObject.tag == "Bullet")
+        {
+            Destroy(collision.gameObject);
+            currentHealth += -1;
+            hpBar.UpdateHpBar(maxHealth, currentHealth);
+        }
+    }
+
+
+
     [Header("Movement")]
     //Can change speed
     private float moveSpeed;
     public float walkSpeed;
     public float sprintSpeed;
-
-
 
     //Change friction with ground 
     public float groundDrag;
@@ -42,8 +64,6 @@ public class PlayerScript : MonoBehaviour
 
     Vector3 moveDirection;
 
-    Rigidbody rb;
-
     //Movement Data
     public MovementState state;
 
@@ -55,6 +75,8 @@ public class PlayerScript : MonoBehaviour
         air,
     }
 
+    public Rigidbody rb;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -65,6 +87,8 @@ public class PlayerScript : MonoBehaviour
         //Set active jump
         readyToJump = true;
 
+        //For HPBar
+        hpBar = FindObjectOfType<HPBar>();
     }
 
     // Update is called once per frame
@@ -117,6 +141,8 @@ public class PlayerScript : MonoBehaviour
         {
             state = MovementState.sprinting;
             moveSpeed = sprintSpeed;
+            currentHealth += -1;
+
         }
 
         //Walking
@@ -164,3 +190,4 @@ public class PlayerScript : MonoBehaviour
         readyToJump = true;
     }
 }
+
