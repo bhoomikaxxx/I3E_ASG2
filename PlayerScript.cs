@@ -1,13 +1,20 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
+using UnityEngine.Audio;
+using TMPro;
+
+
 
 public class PlayerScript : MonoBehaviour
 {
+    
 
     //HealthBar
-    int currentHealth = 20;
+    float currentHealth = 20;
     int maxHealth = 20;
     public HPBar hpBar;
 
@@ -20,13 +27,34 @@ public class PlayerScript : MonoBehaviour
         //Points added if player collects
         if (collision.gameObject.tag == "Bullet")
         {
-            Destroy(collision.gameObject);
             currentHealth += -1;
             hpBar.UpdateHpBar(maxHealth, currentHealth);
+            if (currentHealth <= 0)
+            {
+                SceneManager.LoadScene(3);
+            }
         }
     }
 
+    //Bullet
+    public GameObject projectile;
 
+    //Check for gun in hand
+    public bool equipped;
+    bool alreadyAttack;
+
+
+    //Attack enemy
+    private void AttackEnemy()
+    {
+        Rigidbody rbody = Instantiate(projectile, transform.position, Quaternion.identity).GetComponent<Rigidbody>();
+        rbody.AddForce(transform.forward * 15f, ForceMode.Impulse);
+        rbody.AddForce(transform.up * 5f, ForceMode.Impulse);
+
+        equipped = true;
+        alreadyAttack = true;
+
+    }
 
     [Header("Movement")]
     //Can change speed
@@ -94,6 +122,7 @@ public class PlayerScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+
         //Checks for ground
         grounded = Physics.Raycast(transform.position, Vector3.down, playerHeight * 0.5f + 0.2f, GroundLayerM);
 
@@ -108,8 +137,10 @@ public class PlayerScript : MonoBehaviour
 
         //State
         StateHandler();
-    }
 
+        //Z to shoot
+        if (equipped && Input.GetKeyDown(KeyCode.Z)) AttackEnemy();
+    }
     private void FixedUpdate()
     {
         //Move player
@@ -134,6 +165,11 @@ public class PlayerScript : MonoBehaviour
 
     }
 
+    private void OnPress()
+    {
+        currentHealth += -1 * Time.deltaTime;
+    }
+
     private void StateHandler()
     {
         //Sprinting
@@ -141,8 +177,12 @@ public class PlayerScript : MonoBehaviour
         {
             state = MovementState.sprinting;
             moveSpeed = sprintSpeed;
-            currentHealth += -1;
-
+            OnPress();
+            hpBar.UpdateHpBar(maxHealth, currentHealth);
+            if (currentHealth <= 0)
+            {
+                SceneManager.LoadScene(3);
+            }
         }
 
         //Walking
@@ -190,4 +230,3 @@ public class PlayerScript : MonoBehaviour
         readyToJump = true;
     }
 }
-
