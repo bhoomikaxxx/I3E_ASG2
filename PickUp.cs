@@ -4,8 +4,53 @@ using UnityEngine;
 
 public class PickUp : MonoBehaviour
 {
+    //Gun bullet
+    public int damage;
+    public bool allowButtonHold;
+    public float spread;
+    bool shooting;
+    public Camera cam;
+    public Transform attackPoint;
+    public RaycastHit rayHit;
+    public LayerMask EnemyM;
+    public float rangeRay = 5;
+    public GameObject projectile;
+
+
+
+    private void MyInput()
+    {
+        shooting = Input.GetKeyDown(KeyCode.Mouse0);
+        if (shooting)
+        {
+            ShootBullet();
+            shooting = false;
+        }
+    }
+
+    //Bullet shoot
+    private void ShootBullet()
+    {
+        //Spread
+        float x = Random.Range(-spread, spread);
+        float y = Random.Range(-spread, spread);
+        //Calculate Direction with Spread
+        Vector3 direction = cam.transform.forward + new Vector3(x, y, 0);
+
+        if (Physics.Raycast(cam.transform.position, direction, out rayHit, rangeRay, EnemyM))
+        {
+            if (rayHit.collider.CompareTag("Enemy"))
+                rayHit.collider.GetComponent<EnemyScript>().TakeDamage(damage);
+        }
+
+        //Bullet
+        Instantiate(projectile, rayHit.point, Quaternion.Euler(0, 180, 0));
+    }
+
     //Gun pick up
-    public gunScript shootScript;
+    public float range = 5;
+
+    //public gunScript shootScript;
     public Rigidbody rigidb;
     public BoxCollider coll;
     public Transform gunContainer, player, fpsCam; //+player orientation +camera
@@ -34,8 +79,6 @@ public class PickUp : MonoBehaviour
         transform.localRotation = Quaternion.Euler(Vector3.zero);
         transform.localScale = Vector3.one;
 
-        //Gun script enable
-        shootScript.enabled = true;
     }
 
     //Drop
@@ -60,31 +103,48 @@ public class PickUp : MonoBehaviour
         float random = Random.Range(-1f, 1f);
         rigidb.AddTorque(new Vector3(random, random, random) * 10);
 
-        shootScript.enabled = false;
     }
     //For gun
     private void Update()
     {
+        MyInput();
+
         Vector3 distanceToPlayer = player.position - transform.position;
 
         //Check for gun in hand
-        if (!equipped && distanceToPlayer.magnitude <= pickUpRange && Input.GetKeyDown(KeyCode.E) && slotFull) PickUpGun();
+        
+
+
+        if (!equipped && distanceToPlayer.magnitude <= pickUpRange && Input.GetKeyDown(KeyCode.E) && !slotFull) PickUpGun();
 
         //Drop gun if have
         if (equipped && Input.GetKeyDown(KeyCode.Q)) Drop();
 
         if (!equipped)
         {
-            shootScript.enabled = false;
+            //shootScript.enabled = false;
             rigidb.isKinematic = false;
             coll.isTrigger = false;
         }
         if (equipped)
         {
-            shootScript.enabled = true;
+            //shootScript.enabled = true;
             rigidb.isKinematic = true;
             coll.isTrigger = true;
             slotFull = true;
+        }
+
+        //Raycast
+        Ray theRay = new Ray(transform.position, transform.forward);
+
+        Debug.DrawRay(transform.position, transform.forward * range);
+
+        if (Physics.Raycast(theRay, out RaycastHit hit, range))
+        {
+            if (hit.collider.tag == "Player")
+            {
+                PickUpGun();
+            }
         }
     }
 }
