@@ -18,8 +18,14 @@ public class PlayerScript : MonoBehaviour
     int maxHealth = 20;
     public HPBar hpBar;
 
-    //Count of collectibles
-    int count = 0;
+    private void HealthDead()
+    {
+        if (currentHealth <= 0)
+        {
+            FindObjectOfType<PlayerDeath>().GetComponent<PlayerDeath>().Dead();
+        }
+    }
+
 
     //HP Bar measures
     private void OnCollisionEnter(Collision collision)
@@ -29,10 +35,26 @@ public class PlayerScript : MonoBehaviour
         {
             currentHealth += -1;
             hpBar.UpdateHpBar(maxHealth, currentHealth);
-            if (currentHealth <= 0)
-            {
-                SceneManager.LoadScene(3);
-            }
+            HealthDead();
+        }
+        if (collision.gameObject.tag == "Tower")
+        {
+            currentHealth += -1;
+            hpBar.UpdateHpBar(maxHealth, currentHealth);
+            HealthDead();
+        }
+
+    }
+
+    private void OnCollisionStay(Collision collision)
+    {
+        if (collision.gameObject.tag == "Lava")
+        {
+            Debug.Log("ahh dying");
+            currentHealth += -1 * Time.deltaTime;
+            hpBar.UpdateHpBar(maxHealth, currentHealth);
+            HealthDead();
+
         }
     }
 
@@ -48,8 +70,8 @@ public class PlayerScript : MonoBehaviour
     private void AttackEnemy()
     {
         Rigidbody rbody = Instantiate(projectile, transform.position, Quaternion.identity).GetComponent<Rigidbody>();
-        rbody.AddForce(transform.forward * 15f, ForceMode.Impulse);
-        rbody.AddForce(transform.up * 5f, ForceMode.Impulse);
+        rbody.AddForce(transform.forward * 10f, ForceMode.Impulse);
+        rbody.AddForce(transform.up * 4f, ForceMode.Impulse);
 
         equipped = true;
         alreadyAttack = true;
@@ -81,6 +103,9 @@ public class PlayerScript : MonoBehaviour
     [Header("Ground Check")]
     public float playerHeight;
     public LayerMask GroundLayerM;
+    public LayerMask SpaceshipM;
+    public LayerMask TerrainM;
+    public LayerMask LavaM;
     bool grounded;
 
     //Camera orientation
@@ -154,7 +179,7 @@ public class PlayerScript : MonoBehaviour
         verticalnput = Input.GetAxisRaw("Vertical");
 
         //When need to jump
-        if(Input.GetKey(jumpKey) && readyToJump && grounded)
+        if(Input.GetKey(jumpKey) && readyToJump)  /*&& grounded*/
         {
             readyToJump = false;
 
@@ -173,16 +198,14 @@ public class PlayerScript : MonoBehaviour
     private void StateHandler()
     {
         //Sprinting
-        if(grounded && Input.GetKey(sprintKey))
+        if(/*grounded &&*/ Input.GetKey(sprintKey))
         {
             state = MovementState.sprinting;
             moveSpeed = sprintSpeed;
             OnPress();
             hpBar.UpdateHpBar(maxHealth, currentHealth);
-            if (currentHealth <= 0)
-            {
-                SceneManager.LoadScene(3);
-            }
+            HealthDead();
+
         }
 
         //Walking
@@ -195,7 +218,9 @@ public class PlayerScript : MonoBehaviour
         //In air
         else
         {
-            state = MovementState.air;
+            state = MovementState.walking;
+            moveSpeed = walkSpeed;
+            //state = MovementState.air;
 
         }
     }
@@ -212,7 +237,9 @@ public class PlayerScript : MonoBehaviour
         //In air
         else if(!grounded)
         {
-            rb.AddForce(moveDirection.normalized * moveSpeed * 10f * airMultiplier, ForceMode.Force);
+            rb.AddForce(moveDirection.normalized * moveSpeed * 10f, ForceMode.Force);
+
+            //rb.AddForce(moveDirection.normalized * moveSpeed * 10f * airMultiplier, ForceMode.Force);
 
         }
     }
@@ -228,5 +255,11 @@ public class PlayerScript : MonoBehaviour
     private void ResetJump()
     {
         readyToJump = true;
+    }
+
+    public void Quit()
+    {
+        Application.Quit();
+        Debug.Log("Game Quit");
     }
 }
