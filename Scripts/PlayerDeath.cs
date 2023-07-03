@@ -8,10 +8,15 @@ public class PlayerDeath : MonoBehaviour
 {
     public void Dead()
     {
-        GetComponent<Animator>().SetTrigger("IsPlayerDead");
+        Debug.Log("player died");
+        GetComponent<Animator>().SetTrigger("IsPlayerDying");
         GetComponent<AudioSource>().Play();
-        SceneManager.LoadScene(3);
+        
+    }
 
+    public void AfterDeath()
+    {
+        SceneManager.LoadScene(4);
     }
 
     // Start is called before the first frame update

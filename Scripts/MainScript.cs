@@ -2,10 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 
 public class MainScript : MonoBehaviour
 {
+    
+
     /// <summary>
     /// The prefab of the player used for spawning.
     /// </summary>
@@ -14,7 +17,9 @@ public class MainScript : MonoBehaviour
     /// <summary>
     /// Store the active player in the game.
     /// </summary>
-    private PlayerScript activePlayer;
+    private DontDestroyOnLoadScript activePlayer;
+
+    private PickUp gun;
 
     /// <summary>
     /// Store the active GameManager.
@@ -53,36 +58,44 @@ public class MainScript : MonoBehaviour
     /// <param name="nextScene"></param>
     void SpawnPlayerOnLoad(Scene currentScene, Scene nextScene)
     {
-        if (nextScene.buildIndex == 0)
+        if (nextScene.buildIndex == 0 || nextScene.buildIndex == 3 || nextScene.buildIndex == 4)
         {
             if (activePlayer != null)
             {
-                Destroy(activePlayer);
+                Destroy(activePlayer.gameObject);
                 activePlayer = null;
             }
             return;
         }
 
 
+        PlayerSpawnSpot playerSpot = FindObjectOfType<PlayerSpawnSpot>();
         // Checking if there is any active player in the game.
         if (activePlayer == null)
         {
             // If there is no player, I should spawn one.
-            GameObject newPlayer = Instantiate(playerPrefab, Vector3.zero, Quaternion.identity);
+            GameObject newPlayer = Instantiate(playerPrefab, playerSpot.transform.position, Quaternion.identity);
 
             // Store the active player.
-            activePlayer = newPlayer.GetComponent<Player>();
-            activePlayer.SetUp();
+            activePlayer = newPlayer.GetComponent<DontDestroyOnLoadScript>();
+
+            Debug.Log("active player + " + activePlayer != null);
+            //activePlayer.SetUp();
         }
         // If there is already a player, position the player at the right spot.
         else
         {
             // Find the spawn spot
-            PlayerSpawnSpot playerSpot = FindObjectOfType<PlayerSpawnSpot>();
 
             // Position and rotate the player
-            activePlayer.transform.position = playerSpot.transform.position;
-            activePlayer.transform = playerSpot.transform;
+            activePlayer.GetComponentInChildren<PlayerScript>().transform.position = playerSpot.transform.position;
+            //activePlayer.transform = playerSpot.transform;
+        }
+
+
+        if (nextScene.buildIndex == 3)
+        {
+            //activePlayer.GetComponentInChildren<PlayerScript>().ActivateGun();
         }
     }
 
@@ -104,6 +117,13 @@ public class MainScript : MonoBehaviour
             gamePaused = false;
         }
     }
+    public void Quit()
+    {
+        Application.Quit();
+        Debug.Log("Game Quit");
+    }
 }
 
-}
+
+
+

@@ -18,11 +18,27 @@ public class PlayerScript : MonoBehaviour
     int maxHealth = 20;
     public HPBar hpBar;
 
+    //Gun
+    public GameObject gun;
+
+    public void ActivateGun()
+    {
+        gun.SetActive(true);
+    }
+
+    public void DeactivateGun()
+    {
+        gun.SetActive(false);
+    }
+    
+
     private void HealthDead()
     {
         if (currentHealth <= 0)
         {
-            FindObjectOfType<PlayerDeath>().GetComponent<PlayerDeath>().Dead();
+            FindObjectOfType<PlayerDeath>().Dead();    
+            Debug.Log("CameraDied");
+
         }
     }
 

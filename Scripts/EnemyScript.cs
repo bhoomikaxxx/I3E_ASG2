@@ -14,7 +14,7 @@ public class EnemyScript : MonoBehaviour
 
     private Vector3 groundLayer;
 
-    int health = 5;
+    int health = 3;
     int damage = -1;
 
     
@@ -36,11 +36,15 @@ public class EnemyScript : MonoBehaviour
     //To find obj
     private void Awake()
     {
-        player = GameObject.Find("Player").transform;
         agent = GetComponent<NavMeshAgent>();
 
         //Define new vector 3
         groundLayer = new Vector3(0, 2f, 0);
+    }
+
+    private void Start()
+    {
+        player = FindObjectOfType<PlayerScript>().transform;
     }
 
     private void Update()
@@ -140,7 +144,8 @@ public class EnemyScript : MonoBehaviour
     {
         if (health <= 0)
         {
-            Destroy(GameObject.FindWithTag("Enemy"));
+            //Destroy(GameObject.FindWithTag("Enemy"));
+            Destroy(gameObject);
         }
     }
 

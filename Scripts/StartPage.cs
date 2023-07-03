@@ -10,6 +10,9 @@ using TMPro;
 
 public class StartPage : MonoBehaviour
 {
+    
+
+
     //Texts in UI
     public TextMeshProUGUI playGame;
     public TextMeshProUGUI confirmGame;

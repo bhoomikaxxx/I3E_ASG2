@@ -4,6 +4,13 @@ using UnityEngine;
 
 public class MainDoorScript : MonoBehaviour
 {
+    
+
+    public void Collected()
+    {
+        GetComponent<Animator>().SetTrigger("isCollectedMainDoor");
+
+    }
     // Start is called before the first frame update
     void Start()
     {
